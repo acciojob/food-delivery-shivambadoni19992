@@ -1,10 +1,19 @@
 package com.driver.ui.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.driver.convertor.FoodConverter;
+import com.driver.convertor.UserConvertor;
 import com.driver.model.request.UserDetailsRequestModel;
 import com.driver.model.response.OperationStatusModel;
+import com.driver.model.response.RequestOperationName;
+import com.driver.model.response.RequestOperationStatus;
 import com.driver.model.response.UserResponse;
+import com.driver.service.UserService;
+import com.driver.shared.dto.UserDto;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,35 +26,47 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+	@Autowired
+	UserService userService;
 
 	@GetMapping(path = "/{id}")
 	public UserResponse getUser(@PathVariable String id) throws Exception{
-
-		return null;
+		UserResponse userResponse=UserConvertor.userDtResponse(userService.getUserByUserId(id));
+		return userResponse;
 	}
 
 	@PostMapping()
 	public UserResponse createUser(@RequestBody UserDetailsRequestModel userDetails) throws Exception{
-
-		return null;
+		UserDto userDto=UserConvertor.userRequestDto(userDetails);
+		UserResponse userResponse=UserConvertor.userDtResponse(userService.createUser(userDto));
+		return userResponse;
 	}
 
 	@PutMapping(path = "/{id}")
 	public UserResponse updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) throws Exception{
-
-		return null;
+		UserDto userDto=UserConvertor.userRequestDto(userDetails);
+		UserResponse userResponse=UserConvertor.userDtResponse(userService.updateUser(id, userDto));
+		return userResponse;
 	}
 
 	@DeleteMapping(path = "/{id}")
 	public OperationStatusModel deleteUser(@PathVariable String id) throws Exception{
+		userService.deleteUser(id);
+		OperationStatusModel operationStatusModel=new OperationStatusModel();
+		operationStatusModel.setOperationName(RequestOperationName.DELETE.toString());
+		operationStatusModel.setOperationResult(RequestOperationStatus.SUCCESS.toString());
 
-		return null;
+		return operationStatusModel;
 	}
 	
 	@GetMapping()
 	public List<UserResponse> getUsers(){
-
-		return null;
+		List<UserDto> userDtos=userService.getUsers();
+		List<UserResponse> userDetailsResponses=new ArrayList<>();
+		for(UserDto f: userDtos){
+			userDetailsResponses.add(UserConvertor.userDtResponse(f));
+		}
+		return userDetailsResponses;
 	}
 	
 }
